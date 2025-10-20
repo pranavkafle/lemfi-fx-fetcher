@@ -14,7 +14,6 @@ function onOpen() {
 // Main function - fetch rates and write to sheet
 function fetchAndWriteRates() {
   const sheet = SpreadsheetApp.getActiveSheet();
-  const ui = SpreadsheetApp.getUi();
   const startTime = new Date();
   
   try {
@@ -85,33 +84,22 @@ function fetchAndWriteRates() {
     }
     
     const elapsed = Math.round((new Date() - startTime) / 1000);
-    const elapsedMin = Math.floor(elapsed / 60);
-    const elapsedSec = elapsed % 60;
-    const timeStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;
-    
-    // Write to sheet
-    writeRatesToSheet(sheet, rates);
-    
     const successRate = Math.round(rates.length / pairs.length * 100);
+    
+    // Write to sheet with summary
+    writeRatesToSheet(sheet, rates, {
+      totalPairs: pairs.length,
+      successful: rates.length,
+      failed: pairs.length - rates.length,
+      successRate: successRate,
+      duration: elapsed
+    });
     
     Logger.log(`\n✅ Done in ${elapsed}s! Saved ${rates.length} rates to sheet`);
     Logger.log(`📊 Success rate: ${successRate}% (${rates.length}/${pairs.length})`);
     
-    // Show summary alert at the END
-    ui.alert(
-      '✅ FX Rates Updated!',
-      `Completed in ${timeStr}\n\n` +
-      `📊 Total Pairs: ${pairs.length}\n` +
-      `✅ Successful: ${rates.length}\n` +
-      `❌ Failed: ${pairs.length - rates.length}\n` +
-      `📈 Success Rate: ${successRate}%`,
-      ui.ButtonSet.OK
-    );
-    
   } catch (error) {
     Logger.log('❌ Error: ' + error.message);
-    // Show error alert
-    ui.alert('❌ Error', error.message, ui.ButtonSet.OK);
     throw error;
   }
 }
@@ -213,7 +201,7 @@ function getRate(from, to, country) {
 }
 
 // Write rates to sheet with formatting
-function writeRatesToSheet(sheet, rates) {
+function writeRatesToSheet(sheet, rates, summary) {
   // Clear existing content
   sheet.clear();
   
@@ -277,22 +265,49 @@ function writeRatesToSheet(sheet, rates) {
   // Freeze header row
   sheet.setFrozenRows(1);
   
-  // Add metadata at the bottom
-  const metadataRow = data.length + 3;
-  const timestamp = new Date();
-  
-  sheet.getRange(metadataRow, 1).setValue('Total Pairs:');
-  sheet.getRange(metadataRow, 2).setValue(data.length);
-  sheet.getRange(metadataRow, 1).setFontWeight('bold');
-  
-  sheet.getRange(metadataRow + 1, 1).setValue('Last Updated:');
-  sheet.getRange(metadataRow + 1, 2).setValue(timestamp);
-  sheet.getRange(metadataRow + 1, 1).setFontWeight('bold');
-  sheet.getRange(metadataRow + 1, 2).setNumberFormat('yyyy-mm-dd hh:mm:ss');
-  
   // Add alternating row colors for better readability
   if (data.length > 0) {
     sheet.getRange(2, 1, data.length, 3)
       .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
   }
+  
+  // Add summary section at the bottom
+  const summaryRow = data.length + 3;
+  const timestamp = new Date();
+  const elapsedMin = Math.floor(summary.duration / 60);
+  const elapsedSec = summary.duration % 60;
+  const timeStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;
+  
+  // Summary header
+  sheet.getRange(summaryRow, 1, 1, 3).merge();
+  sheet.getRange(summaryRow, 1)
+    .setValue('📊 FETCH SUMMARY')
+    .setFontWeight('bold')
+    .setFontSize(11)
+    .setBackground('#f3f3f3')
+    .setHorizontalAlignment('center');
+  
+  // Summary data
+  const summaryData = [
+    ['Total Pairs Attempted:', summary.totalPairs],
+    ['✅ Successful:', summary.successful],
+    ['❌ Failed:', summary.failed],
+    ['📈 Success Rate:', `${summary.successRate}%`],
+    ['⏱️ Duration:', timeStr],
+    ['🕐 Last Updated:', timestamp]
+  ];
+  
+  sheet.getRange(summaryRow + 1, 1, summaryData.length, 2).setValues(summaryData);
+  
+  // Format summary labels
+  sheet.getRange(summaryRow + 1, 1, summaryData.length, 1)
+    .setFontWeight('bold')
+    .setHorizontalAlignment('left');
+  
+  // Format timestamp
+  sheet.getRange(summaryRow + 6, 2).setNumberFormat('yyyy-mm-dd hh:mm:ss');
+  
+  // Add border around summary
+  sheet.getRange(summaryRow, 1, summaryData.length + 1, 2)
+    .setBorder(true, true, true, true, true, true, '#cccccc', SpreadsheetApp.BorderStyle.SOLID);
 }

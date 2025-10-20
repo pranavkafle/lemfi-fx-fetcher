@@ -99,6 +99,26 @@ if (status === 403) {
 
 **Result**: Successfully fetches 150 pairs in ~6-7 minutes with minimal failures.
 
+## ⚠️ Important: Rate Limiting Notice
+
+**This script is intentionally VERY conservative with rate limiting to avoid getting blocked by Lemfi's API.**
+
+- **Default setting**: 3 requests per 2 seconds
+- **Full fetch time**: ~6-7 minutes for all 150 currency pairs
+- **Why so slow?**: Lemfi's API rate limits aggressively (403 errors) if you go faster
+
+### 🔧 Want faster results?
+
+If you only need a few specific currency pairs, you can:
+1. **Reduce the wait time** in the code (at your own risk):
+   ```javascript
+   // Change this line in both index.js and code.js:
+   await delay(1000);  // Instead of 2000 (1 second instead of 2)
+   ```
+2. **Modify sender/receiver lists** to fetch only the pairs you need
+
+⚠️ **Warning**: Being too aggressive with requests may result in temporary IP bans or failed fetches. The current settings are tested and reliable.
+
 ## 🚀 Quick Start
 
 ### Option 1: Node.js (CLI)
@@ -213,10 +233,18 @@ Found 6 sender currencies and 26 receiver currencies
 
 ### Performance
 
-- **Average Duration:** 6-7 minutes for 150 pairs
+- **Average Duration:** 6-7 minutes for 150 pairs ⚠️ *Intentionally conservative*
 - **Success Rate:** ~79% (118/150 pairs)
-- **Rate Limiting:** 3 requests per 2 seconds
-- **Retry Strategy:** Up to 5 attempts with exponential backoff
+- **Rate Limiting:** 3 requests per 2 seconds (can be adjusted but not recommended)
+- **Retry Strategy:** Up to 5 attempts with exponential backoff (15s → 30s → 60s → 120s → 240s)
+
+**Why 6-7 minutes?**
+- 150 pairs ÷ 3 requests per batch = 50 batches
+- 50 batches × 2 seconds = 100 seconds base time (~1.7 minutes)
+- Add rate limit penalties (403 errors) = ~5-6 extra minutes
+- Total: 6-7 minutes
+
+This conservative approach ensures high reliability and avoids IP bans.
 
 ### Architecture
 
@@ -285,10 +313,12 @@ writeFileSync('rates.csv', csv);
 - ⚠️ Not affiliated with or endorsed by Lemfi
 
 ### Limitations
+- ⚠️ **Slow by design**: 6-7 minutes for all pairs (conservative rate limiting)
 - API may change without notice (Lemfi controls it)
-- Rate limiting can affect fetch times
+- Rate limiting hits fast and hard if you're too aggressive
 - Some currency pairs are unsupported (412 status)
 - No guarantee of data accuracy (always verify critical rates)
+- Reducing wait times may result in failed fetches or temporary bans
 
 ## 🛠️ Development
 
