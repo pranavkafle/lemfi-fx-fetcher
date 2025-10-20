@@ -1,0 +1,36 @@
+{
+  "name": "lemfi-fx-fetcher",
+  "version": "1.0.0",
+  "description": "Automated exchange rate fetcher for Lemfi (Lemonade Finance). Fetches 150+ currency pairs via reverse-engineered API. Available in Node.js and Google Apps Script.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "fetch": "node index.js"
+  },
+  "keywords": [
+    "lemfi",
+    "lemonade-finance",
+    "exchange-rate",
+    "currency",
+    "forex",
+    "api",
+    "money-transfer",
+    "currency-converter",
+    "remittance",
+    "google-apps-script"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/lemfi-fx-fetcher.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/lemfi-fx-fetcher/issues"
+  },
+  "homepage": "https://github.com/yourusername/lemfi-fx-fetcher#readme",
+  "author": "Pranav Kafle",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
