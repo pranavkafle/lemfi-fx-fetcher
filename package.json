@@ -22,12 +22,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/lemfi-fx-fetcher.git"
+    "url": "https://github.com/pranavkafle/lemfi-fx-fetcher.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/lemfi-fx-fetcher/issues"
+    "url": "https://github.com/pranavkafle/lemfi-fx-fetcher/issues"
   },
-  "homepage": "https://github.com/yourusername/lemfi-fx-fetcher#readme",
+  "homepage": "https://github.com/pranavkafle/lemfi-fx-fetcher#readme",
   "author": "Pranav Kafle",
   "license": "MIT",
   "engines": {
